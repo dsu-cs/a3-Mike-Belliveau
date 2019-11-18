@@ -40,6 +40,19 @@ private:
     Node<T> *root;
     // the number of nodes in the tree
     int node_count;
+
+    Node<T> *insertHelp(int val, Node<T> *root);
+
+    Node<T> *removeHelp(Node<T> *node, int val);
+
+    std::vector<T> *inorderHelp(std::vector<T> *x, Node<T> *node);
+
+    std::vector<T> *postorderHelp(std::vector<T> *x, Node<T> *node);
+
+    std::vector<T> *preorderHelp(std::vector<T> *x, Node<T> *node);
+
+    Node<T> *searchHelp(Node<T> *node, int val);
+
 };
 
 template<class T>
@@ -63,7 +76,7 @@ template<class T>
  std::vector<T> * BST<T>::inorder()
 {
     std::vector<T> *vec = new std::vector<T>;
-
+    inorderHelp(vec, root);
     return vec;
 }
 
@@ -72,6 +85,7 @@ template<class T>
  std::vector<T> * BST<T>::preorder()
 {
     std::vector<T> *vec = new std::vector<T>;
+    preorderHelp(vec, root);
     return vec;
 }
 
@@ -80,21 +94,21 @@ template<class T>
  std::vector<T> * BST<T>::postorder()
 {
     std::vector<T> *vec = new std::vector<T>;
-
+    postorderHelp(vec, root);
     return vec;
 }
 
 template<class T>
 void BST<T>::insert(T new_data)
 {
-
+    root = insertHelp(new_data, root);
 }
 
 
 template<class T>
 Node<T> *BST<T>::search(T val)
 {
-
+    return searchHelp(root, val);
 }
 
 
@@ -102,7 +116,7 @@ Node<T> *BST<T>::search(T val)
 template<class T>
 void BST<T>::remove(T val)
 {
-
+   root = removeHelp(root, val);
 }
 
 
@@ -110,5 +124,139 @@ void BST<T>::remove(T val)
 template<class T>
 int BST<T>::get_size()
 {
+    return node_count;
+}
 
+template<class T>
+std::vector<T> *BST<T>::inorderHelp(std::vector<T> *x, Node<T> *node)
+{
+    if(node == NULL)
+    {
+        return NULL;
+    }
+    inorderHelp(x, node->get_left());
+    x->push_back(node->get_data());
+    inorderHelp(x, node->get_right());
+    return x;
+}
+
+template<class T>
+std::vector<T> *BST<T>::preorderHelp(std::vector<T> *x, Node<T> *node)
+{
+    if(node == NULL)
+    {
+        return NULL;
+    }
+    x->push_back(node->get_data());
+    preorderHelp(x, node->get_left());
+    preorderHelp(x, node->get_right());
+    return x;
+}
+
+template<class T>
+std::vector<T> *BST<T>::postorderHelp(std::vector<T> *x, Node<T> *node)
+{
+    if (node == NULL)
+    {
+        return NULL;
+    }
+    postorderHelp(x, node->get_left());
+    postorderHelp(x, node->get_right());
+    x->push_back(node->get_data());
+    return x;
+}
+
+template<class T>
+Node<T> *BST<T>::insertHelp(int val, Node<T> * node)
+{
+    if(node == NULL)
+    {
+        Node<T> *tmp = new Node<T>;
+        tmp->set_data(val);
+        tmp->set_left(NULL);
+        tmp->set_right(NULL);
+        node_count++;
+        return tmp;
+    }
+    else if (val < node->get_data())
+    {
+        node->set_left(insertHelp(val, node->get_left()));
+    }
+    else if (val > node->get_data())
+    {
+        node->set_right(insertHelp(val, node->get_right()));
+    }
+    return node;
+}
+
+template <class T>
+Node<T> *BST<T>::searchHelp(Node<T> *node, int val)
+{
+    if (node == NULL)
+    {
+        return NULL;
+    }
+    Node<T> *foundNode = new Node<T>;
+
+    if (node->get_data() == val)
+    {
+        return node;
+    }
+    else if (val < node->get_data())
+    {
+        searchHelp(node->get_left(), val);
+    }
+    else if (val > node->get_data())
+    {
+        searchHelp(node->get_right(), val);
+    }
+
+}
+
+template <class T>
+Node<T> *BST<T>::removeHelp(Node<T> *node, int val)
+{
+    if (node == NULL)
+    {
+        return NULL;
+    }
+
+    if (val < node->get_data())
+    {
+        node->set_left(removeHelp(node->get_left(), val));
+    }
+    else if (val > node->get_data())
+    {
+        node->set_right(removeHelp(node->get_right(), val));
+    }
+    else if (val == node->get_data())
+    {
+        if (node->get_left() == NULL)
+        {
+            Node<T> *tmp = node->get_right();
+            delete(node);
+            return tmp;
+        }
+        else if (node->get_right() == NULL)
+        {
+            Node<T> *tmp = node->get_left();
+            delete(node);
+            return tmp;
+        }
+        
+        Node<T> *tmp = new Node<T>;
+        tmp = node->get_right();
+
+        while(tmp && tmp->get_left() != NULL)
+        {
+            tmp = tmp->get_left();
+        }
+        T data = tmp->get_data();
+        node->set_data(data);
+        node->set_right(removeHelp(node->get_right(), tmp->get_data()));
+    }
+    
+    return node;
+    
+    
 }
